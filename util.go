@@ -91,6 +91,7 @@ type FilterData struct {
 	Operator  int    `json:"operator"`
 	Arg0      string `json:"arg0,omitempty"`
 	Arg1      string `json:"arg1,omitempty"`
+	Args      string `json:"args,omitempty"`
 }
 
 // Field types
@@ -110,6 +111,7 @@ const (
 	Between  = 5
 	NotNull  = 6
 	Null     = 7
+	In       = 8
 )
 
 // wrap placeholder if field type is string
@@ -123,6 +125,8 @@ func getWrappedPlaceholder(fieldType int, arg string) string {
 
 func convertFilterDataToSql(a FilterData) string {
 	switch a.Operator {
+	case In:
+		return "t.\"" + a.FieldName + "\"" + " IN " + a.Args
 	case NotNull:
 		return "t.\"" + a.FieldName + "\"" + " IS NOT NULL"
 	case Null:

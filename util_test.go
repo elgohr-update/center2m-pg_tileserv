@@ -114,6 +114,16 @@ func Test_toOneWhereClause(t *testing.T) {
 				}},
 			"t.\"f1\" IS NULL",
 		},
+		{"in",
+			args{
+				a: FilterData{
+					FieldName: "f1",
+					FieldType: String,
+					Operator:  In,
+					Args:      "(\"q\", \"w\", \"3\")",
+				}},
+			"t.\"f1\" IN (\"q\", \"w\", \"3\")",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
