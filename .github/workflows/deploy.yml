@@ -1,0 +1,39 @@
+name: DEV DEPLOY TO .154:334
+env: 
+  REGISTRY: artifactory.docker.ac-mpr.ru
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: organization-runner
+    steps:
+    - run: chown -R 757 .
+    - name: Git Pull
+      uses: actions/checkout@master 
+         
+    - name: Publish To Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: ${{ env.REGISTRY }}/${{ github.repository }}
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        registry: ${{ env.REGISTRY }}
+        
+  deploy:
+    runs-on: organization-runner
+    needs: [build]
+    steps:
+    - name: Deploy New Docker Image
+      id: deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DEV_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        script: |
+          cd mpr/platform/dev/
+          docker-compose -f docker-compose.tile.yml pull
+          docker-compose -f docker-compose.tile.yml up -d
